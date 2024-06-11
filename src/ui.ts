@@ -4,7 +4,7 @@ import { websocketConnected } from './callbacks.js';
 
 const createUi = (profile: Profile, userInfo: UserInfo): HTMLElement => {
     const container = document.createElement('div');
-    container.style.padding = '10px';
+    container.style.padding = '10px 6px';
     container.style.overflow = 'hidden';
     container.style.fontSize = '95%';
 
@@ -20,12 +20,25 @@ const createUi = (profile: Profile, userInfo: UserInfo): HTMLElement => {
 
     const nameContainer = document.createElement('div');
     nameContainer.style.display = 'flex';
-    nameContainer.style.justifyContent = 'space-between';
+    nameContainer.style.gap = '6px';
+    nameContainer.style.alignItems = 'center';
+    nameContainer.style.marginBottom = '5px';
+    if (profile.avatar && profile.avatar !== profile.id) {
+        const avatar = `https://cdn.chitchat.gg/avatars/${profile.id}/${profile.avatar}.webp`;
+        const avatarLink = document.createElement('a');
+        avatarLink.href = avatar;
+        avatarLink.target = '_blank';
+        const avatarImg = document.createElement('img');
+        avatarImg.src = avatar;
+        avatarImg.width = 42;
+        avatarLink.append(avatarImg);
+        nameContainer.append(avatarLink);
+    }
     const name = document.createElement('span');
     name.className = 'cursor-pointer';
     name.textContent = profile.username;
+    name.style.flex = '1';
     name.style.fontSize = '115%';
-    name.style.marginBottom = '6px';
     name.style.color = userInfo.avoid ? '#FF5733' : '#4bb643';
     name.onclick = () => {
         userInfo.avoid = !userInfo.avoid;
@@ -33,15 +46,6 @@ const createUi = (profile: Profile, userInfo: UserInfo): HTMLElement => {
         setUserInfo(profile.id, userInfo);
     };
     nameContainer.append(name);
-    if (profile.avatar && profile.avatar !== profile.id) {
-        const avatarLink = document.createElement('a');
-        avatarLink.textContent = '🖼';
-        avatarLink.style.fontSize = '160%';
-        avatarLink.style.lineHeight = '100%';
-        avatarLink.href = `https://cdn.chitchat.gg/avatars/${profile.id}/${profile.avatar}.webp`;
-        avatarLink.target = '_blank';
-        nameContainer.append(avatarLink);
-    }
     container.append(nameContainer);
 
     const matches = document.createElement('div');
