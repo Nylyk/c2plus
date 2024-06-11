@@ -1,0 +1,17 @@
+{
+    "manifest_version": 2,
+    "name": "c2plus",
+    "version": "0.1.0",
+
+    "description": "c2plus",
+
+    "content_scripts": [
+        {
+            "matches": ["*://app.chitchat.gg/*"],
+            "run_at": "document_end",
+            "js": ["inject.js"]
+        }
+    ],
+
+    "web_accessible_resources": ["js/index.js", "js/api.js", "js/callbacks.js", "js/ui.js", "js/user.js"]
+}
