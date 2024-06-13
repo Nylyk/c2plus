@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "description": "",
   "scripts": {
-    "build": "tsc -w",
-    "production": "tsc",
+    "build": "node ./build.js",
     "pack": "cd dist && zip -9 -r ../c2plus.zip ./*"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "esbuild": "^0.21.5",
     "typescript": "^5.4.3"
   }
 }

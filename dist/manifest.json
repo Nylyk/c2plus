@@ -8,12 +8,12 @@
         {
             "matches": ["*://app.chitchat.gg/*"],
             "run_at": "document_end",
-            "js": ["inject.js"]
+            "js": ["index.js"]
         }
     ],
     "web_accessible_resources": [
         {
-            "resources": ["js/index.js", "js/api.js", "js/callbacks.js", "js/ui.js", "js/user.js"],
+            "resources": ["injection.js"],
             "matches": ["*://app.chitchat.gg/*"]
         }
     ]

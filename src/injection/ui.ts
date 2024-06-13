@@ -1,6 +1,6 @@
-import { Profile } from './api.js';
-import { UserInfo, setUserInfo } from './user.js';
-import { websocketConnected } from './callbacks.js';
+import { Profile } from './api';
+import { UserInfo, setUserInfo } from './user';
+import { websocketConnected } from './callbacks';
 
 const createUi = (profile: Profile, userInfo: UserInfo): HTMLElement => {
     const container = document.createElement('div');
