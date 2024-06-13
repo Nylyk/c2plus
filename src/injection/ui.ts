@@ -1,8 +1,8 @@
 import { Profile } from './api';
-import { UserInfo, setUserInfo } from './user';
+import { User, saveUser } from './user';
 import { websocketConnected } from './callbacks';
 
-const createUi = (profile: Profile, userInfo: UserInfo): HTMLElement => {
+const createUi = (profile: Profile, user: User): HTMLElement => {
     const container = document.createElement('div');
     container.style.padding = '10px 6px';
     container.style.overflow = 'hidden';
@@ -39,31 +39,31 @@ const createUi = (profile: Profile, userInfo: UserInfo): HTMLElement => {
     name.textContent = profile.username;
     name.style.flex = '1';
     name.style.fontSize = '115%';
-    name.style.color = userInfo.avoid ? '#FF5733' : '#4bb643';
+    name.style.color = user.avoid ? '#FF5733' : '#4bb643';
     name.onclick = () => {
-        userInfo.avoid = !userInfo.avoid;
-        name.style.color = userInfo.avoid ? '#FF5733' : '#4bb643';
-        setUserInfo(profile.id, userInfo);
+        user.avoid = !user.avoid;
+        name.style.color = user.avoid ? '#FF5733' : '#4bb643';
+        saveUser(user);
     };
     nameContainer.append(name);
     container.append(nameContainer);
 
     const matches = document.createElement('div');
     matches.style.marginBottom = '3px';
-    if (userInfo.matches.length === 0) {
+    if (user.matches.length === 0) {
         matches.style.color = '#FF5733';
         matches.textContent = 'Never Matched';
-    } else if (userInfo.matches.length === 1) {
+    } else if (user.matches.length === 1) {
         matches.style.color = '#4bb643';
         matches.textContent = 'First Match';
     } else {
         matches.className = 'cursor-pointer';
-        matches.textContent = `Previously matched ${userInfo.matches.length-1} ${userInfo.matches.length-1 === 1 ? 'time' : 'times'}`;
+        matches.textContent = `Previously matched ${user.matches.length-1} ${user.matches.length-1 === 1 ? 'time' : 'times'}`;
         const matchList = document.createElement('ul');
         matchList.style.listStyleType = 'disc';
         matchList.style.marginLeft = '20px';
         matchList.style.display = 'none';
-        userInfo.matches.forEach((m) => {
+        user.matches.forEach((m) => {
             const match = document.createElement('li');
             match.textContent = new Date(m).toLocaleDateString(undefined, { hour: 'numeric', minute: 'numeric' });
             matchList.append(match);
@@ -73,7 +73,7 @@ const createUi = (profile: Profile, userInfo: UserInfo): HTMLElement => {
     }
     container.append(matches);
 
-    const otherNames = userInfo.names.filter(n => n !== profile.username);
+    const otherNames = user.names.filter(n => n !== profile.username);
     if (otherNames.length > 0) {
         const names = document.createElement('div');
         names.textContent = `Other Names: ${otherNames.join(', ')}`;
@@ -105,7 +105,7 @@ const createUi = (profile: Profile, userInfo: UserInfo): HTMLElement => {
     }
     container.append(interests);
 
-    const oldInterests = userInfo.interests.filter(i => profile.interests.indexOf(i) === -1);
+    const oldInterests = user.interests.filter(i => profile.interests.indexOf(i) === -1);
     if (oldInterests.length > 0) {
         const oldInterestsText = document.createElement('div');
         oldInterestsText.className = 'cursor-pointer';
@@ -150,12 +150,12 @@ const createUi = (profile: Profile, userInfo: UserInfo): HTMLElement => {
     info.style.marginTop = '5px';
     info.style.padding = '3px 5px';
     info.style.width = '100%';
-    info.value = userInfo.info;
+    info.value = user.info;
     info.placeholder = `Info about ${profile.username}`;
     info.onblur = () => {
-        if (info.value !== userInfo.info) {
-            userInfo.info = info.value;
-            setUserInfo(profile.id, userInfo);
+        if (info.value !== user.info) {
+            user.info = info.value;
+            saveUser(user);
         }
     }
     container.append(info);

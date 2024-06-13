@@ -1,76 +1,41 @@
-interface UserInfo {
+import { Dexie, type EntityTable } from 'dexie';
+
+interface User {
+    id: string,
     matches: string[],
     names: string[],
     interests: string[],
     avoid: boolean,
     info: string
 }
+ 
+const db = new Dexie('c2plus') as Dexie & { users: EntityTable<User, 'id'> };
+db.version(1).stores({
+    users: '&id, matches, names, interests, avoid, info'
+});
 
-let db: IDBDatabase | undefined;
-const dbOpenRequest = indexedDB.open('c2plus');
-
-dbOpenRequest.onsuccess = (event) => {
-    console.log('Databased opened');
-    db = dbOpenRequest.result;
-    const countRequest = db.transaction('users').objectStore('users').count();
-    countRequest.onsuccess = () => console.log(`${countRequest.result} users loaded`);
-};
-
-dbOpenRequest.onupgradeneeded = (event) => {
-    db = dbOpenRequest.result;
-    db.onerror = (event) => {
-        console.error('Error opening database: ', event);
-    };
-
-    const userStore = db.createObjectStore('users', { keyPath: 'id' });
-    userStore.createIndex('matches', 'matches');
-    userStore.createIndex('names', 'names');
-    userStore.createIndex('interests', 'interests');
-    userStore.createIndex('avoid', 'avoid');
-    userStore.createIndex('info', 'info');
-};
-
-dbOpenRequest.onerror = (event) => {
-    console.error('Error opening database: ', event);
-};
-
-const getUserInfo = (id: string): Promise<UserInfo> => {
-    return new Promise((resolve, reject) => {
-        if (!db) {
-            reject('Database not opened');
-            return;
-        }
-    
-        const transaction = db.transaction('users', 'readwrite').objectStore('users');
-        const request = transaction.openCursor(id);
-        request.onsuccess = () => {
-            if (!request.result) {
-                let userInfo = {
+const loadUser = (id: string): Promise<User> => {
+    return db.users.get(id)
+        .then((user) => {
+            if (!user) {
+                user = {
+                    id,
                     matches: [],
                     names: [],
                     interests: [],
                     avoid: false,
                     info: ''
                 };
-                const request = transaction.put({ id, ...userInfo });
-                request.onsuccess = () => resolve(userInfo);
-                return;
+
+                db.users.put(user);
             }
 
-            resolve(request.result.value);
-        };
-    });
+            return user;
+        });
 };
 
-const setUserInfo = (id: string, userInfo: UserInfo): Promise<void> => {
-    return new Promise((resolve, reject) => {
-        if (!db) {
-            reject('Database not opened');
-            return;
-        }
-        const request = db.transaction('users', 'readwrite').objectStore('users').put({ id, ...userInfo });
-        request.onsuccess = () => resolve();
-    });
+const saveUser = (user: User): Promise<void> => {
+    return db.users.put(user).then();
 };
 
-export { UserInfo, getUserInfo, setUserInfo };
+export { User, loadUser, saveUser };

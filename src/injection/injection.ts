@@ -1,4 +1,4 @@
-import { getUserInfo, setUserInfo } from './user';
+import { loadUser, saveUser } from './user';
 import { Profile, MatchUpdateMessage, fetchProfile, fetchMeProfile, getUserIdFromConversation, Conversation } from './api';
 import { setLocationChangeCallback, setWebSocketMessageCallback } from './callbacks';
 import { createUi } from './ui';
@@ -29,13 +29,13 @@ setWebSocketMessageCallback((msg) => {
         profile = message.match.conversation.participants[1].profile;
     }
 
-    return getUserInfo(profile.id)
-        .then((userInfo) => {
-            if (userInfo.matches[userInfo.matches.length-1] !== message.match.conversation.createdAt) {
-                userInfo.matches.push(message.match.conversation.createdAt);
+    return loadUser(profile.id)
+        .then((user) => {
+            if (user.matches[user.matches.length-1] !== message.match.conversation.createdAt) {
+                user.matches.push(message.match.conversation.createdAt);
             }
 
-            return setUserInfo(profile.id, userInfo);
+            return saveUser(user);
         });
 });
 
@@ -56,10 +56,10 @@ const onLocationChange = (path: string) => {
     currentlyFetching = conversationId;
 
     getUserIdFromConversation(conversationId)
-        .then(id => Promise.all([fetchProfile(id), getUserInfo(id)]))
-        .then(([profile, userInfo]) => {
-            if (userInfo.names.indexOf(profile.username) === -1) {
-                userInfo.names.push(profile.username);
+        .then(id => Promise.all([fetchProfile(id), loadUser(id)]))
+        .then(([profile, user]) => {
+            if (user.names.indexOf(profile.username) === -1) {
+                user.names.push(profile.username);
             }
 
             if (lastMatchUpdate && lastMatchUpdate.match.conversation.id === conversationId) {
@@ -67,17 +67,17 @@ const onLocationChange = (path: string) => {
                 profile.interests.push(...newCommonInterests);
             }
 
-            const newInterests = profile.interests.filter(i => userInfo.interests.indexOf(i) === -1);
-            userInfo.interests.push(...newInterests);
+            const newInterests = profile.interests.filter(i => user.interests.indexOf(i) === -1);
+            user.interests.push(...newInterests);
             
-            setUserInfo(profile.id, userInfo);
+            saveUser(user);
 
             if (currentlyFetching !== conversationId) {
                 return;
             }
             currentlyFetching = '';
 
-            currentUi = createUi(profile, userInfo);
+            currentUi = createUi(profile, user);
             document.querySelector('aside > div:nth-child(2) > div')!.prepend(currentUi);
         })
         .catch(console.error);

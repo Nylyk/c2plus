@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      dexie:
+        specifier: ^4.0.7
+        version: 4.0.7
     devDependencies:
       '@types/chrome':
         specifier: ^0.0.268
@@ -170,6 +174,9 @@ packages:
   '@types/har-format@1.2.15':
     resolution: {integrity: sha512-RpQH4rXLuvTXKR0zqHq3go0RVXYv/YVqv4TnPH95VbwUxZdQlK1EtcMvQvMpDngHbt13Csh9Z4qT9AbkiQH5BA==}
 
+  dexie@4.0.7:
+    resolution: {integrity: sha512-M+Lo6rk4pekIfrc2T0o2tvVJwL6EAAM/B78DNfb8aaxFVoI1f8/rz5KTxuAnApkwqTSuxx7T5t0RKH7qprapGg==}
+
   esbuild@0.21.5:
     resolution: {integrity: sha512-mg3OPMV4hXywwpoDxu3Qda5xCKQi+vCTZq8S9J/EpkhB2HzKXq4SNFZE3+NK93JYxc8VMSep+lOUSC/RVKaBqw==}
     engines: {node: '>=12'}
@@ -263,6 +270,8 @@ snapshots:
   '@types/filewriter@0.0.33': {}
 
   '@types/har-format@1.2.15': {}
+
+  dexie@4.0.7: {}
 
   esbuild@0.21.5:
     optionalDependencies:
