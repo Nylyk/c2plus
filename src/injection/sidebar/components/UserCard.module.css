@@ -1,0 +1,52 @@
+.usercard {
+    padding: 8px 4px 0 4px;
+    overflow: hidden;
+    font: 95%;
+    user-select: none;
+}
+
+.usercard > *:not(:last-child) {
+    margin-bottom: 3px;
+}
+
+.usercard ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    user-select: text;
+}
+
+.header {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.name {
+    flex: 1;
+    font-size: 110%;
+}
+
+.info {
+    margin-top: 5px;
+    padding: 3px 5px;
+    width: 100%;
+    min-height: 60px;
+    background: #17171c;
+}
+
+.pointer:hover {
+    cursor: pointer;
+}
+
+.green {
+    color: #4bb643;
+}
+
+.red {
+    color: #ff5733;
+}
+
+.premium {
+    color: #63cffa;
+}

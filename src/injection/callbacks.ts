@@ -1,10 +1,7 @@
-let websocketConnected = false;
-
 const setWebSocketMessageCallback = (handler: (msg: string) => Promise<any>) => {
     Object.defineProperty(WebSocket.prototype, 'onmessage', {
         set(this: WebSocket, oldHandler: (this: WebSocket, e: MessageEvent) => void) {
             this.addEventListener('message', (e): void => {
-                websocketConnected = true;
                 handler(e.data)
                     .then(() => oldHandler.call(this, e))
                     .catch(console.error);
@@ -34,4 +31,4 @@ const setLocationChangeCallback = (handler: (path: string) => void) => {
     });
 };
 
-export { websocketConnected, setWebSocketMessageCallback, setLocationChangeCallback };
+export { setWebSocketMessageCallback, setLocationChangeCallback };

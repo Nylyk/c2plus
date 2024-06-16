@@ -7,7 +7,7 @@ interface Profile {
         showInterests: string,
         showPremiumBadge: string,
     },
-    interests: string[],
+    interests: string[] | undefined,
     badges: number[]
 }
 
@@ -64,4 +64,4 @@ const getUserIdFromConversation = async (conversationId: string): Promise<string
     return id;
 };
 
-export { Profile, Conversation, MatchUpdateMessage, fetchMeProfile, fetchProfile, getUserIdFromConversation };
+export { type Profile, type Conversation, type MatchUpdateMessage, fetchMeProfile, fetchProfile, getUserIdFromConversation };

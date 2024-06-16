@@ -1,28 +1,18 @@
-import { Dexie, type EntityTable } from 'dexie';
+import { Profile } from './api';
+import { db, User } from './db';
 
-interface User {
-    id: string,
-    matches: string[],
-    names: string[],
-    interests: string[],
-    avoid: boolean,
-    info: string
-}
- 
-const db = new Dexie('c2plus') as Dexie & { users: EntityTable<User, 'id'> };
-db.version(1).stores({
-    users: '&id, matches, names, interests, avoid, info'
-});
-
-const loadUser = (id: string): Promise<User> => {
-    return db.users.get(id)
+const loadOrCreateUser = (profile: Profile): Promise<User> => {
+    return db.users.get(profile.id)
         .then((user) => {
             if (!user) {
                 user = {
-                    id,
+                    id: profile.id,
+                    name: profile.username,
+                    previousNames: [],
+                    createdAt: profile.createdAt,
                     matches: [],
-                    names: [],
-                    interests: [],
+                    commonInterests: [],
+                    interests: profile.interests || [],
                     avoid: false,
                     info: ''
                 };
@@ -34,8 +24,29 @@ const loadUser = (id: string): Promise<User> => {
         });
 };
 
-const saveUser = (user: User): Promise<void> => {
-    return db.users.put(user).then();
+const updateUserFromProfile = (profile: Profile) => {
+    return loadOrCreateUser(profile)
+        .then((user) => {
+            if (!user) {
+                return;
+            }
+
+            if (user.name !== profile.username) {
+                if (user.previousNames.indexOf(user.name) === -1) {
+                    user.previousNames.push(user.name);
+                }
+                user.name = profile.username;
+            }
+
+            const newInterests = profile.interests?.filter(i => user.interests.indexOf(i) === -1);
+            if (newInterests) {
+                user.interests.push(...newInterests);
+            }
+
+            user.createdAt = profile.createdAt;
+
+            db.users.put(user);
+        })
 };
 
-export { User, loadUser, saveUser };
+export { loadOrCreateUser, updateUserFromProfile };

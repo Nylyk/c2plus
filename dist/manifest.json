@@ -13,7 +13,7 @@
     ],
     "web_accessible_resources": [
         {
-            "resources": ["injection.js"],
+            "resources": ["injection.js", "injection.css"],
             "matches": ["*://app.chitchat.gg/*"]
         }
     ]

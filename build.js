@@ -1,6 +1,7 @@
-const esbuild = require('esbuild');
+const { build } = require('esbuild');
+const { solidPlugin } = require('esbuild-plugin-solid');
 
-esbuild.build({
+build({
     entryPoints: [
         {
             in: 'src/index.ts',
@@ -12,5 +13,6 @@ esbuild.build({
         }
     ],
     outdir: 'dist',
-    bundle: true
+    bundle: true,
+    plugins: [solidPlugin()]
 }).catch(console.error);

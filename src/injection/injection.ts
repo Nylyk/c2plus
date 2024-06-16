@@ -1,14 +1,29 @@
-import { loadUser, saveUser } from './user';
-import { Profile, MatchUpdateMessage, fetchProfile, fetchMeProfile, getUserIdFromConversation, Conversation } from './api';
-import { setLocationChangeCallback, setWebSocketMessageCallback } from './callbacks';
-import { createUi } from './ui';
+import { Profile, MatchUpdateMessage, fetchMeProfile } from './api';
+import { setWebSocketMessageCallback } from './callbacks';
+import { render } from 'solid-js/web';
+import { SidebarRoot } from './sidebar/SidebarRoot';
+import { db } from './db';
+import { loadOrCreateUser, updateUserFromProfile } from './user';
 
 let me: Profile | undefined;
-fetchMeProfile().then(profile => me = profile);
+fetchMeProfile().then(profile => {
+    me = profile;
+    updateUserFromProfile(profile);
+});
 
-let lastMatchUpdate: MatchUpdateMessage | undefined; 
+let mounted = false;
 
 setWebSocketMessageCallback((msg) => {
+    if (!mounted) {
+        const sidebarMount = document.querySelector('aside > div:nth-child(2) > div > div') as HTMLElement | null;
+        if (sidebarMount) {
+            sidebarMount.textContent = '';
+            sidebarMount.style.padding = '0';
+            render(SidebarRoot, sidebarMount);
+            mounted = true;
+        }
+    }
+
     if (!msg.includes('matchUpdate') || !me) {
         return Promise.resolve();
     }
@@ -22,70 +37,21 @@ setWebSocketMessageCallback((msg) => {
         return Promise.resolve();
     }
 
-    lastMatchUpdate = message;
-
     let profile = message.match.conversation.participants[0].profile;
     if (profile.id === me.id) {
         profile = message.match.conversation.participants[1].profile;
     }
 
-    return loadUser(profile.id)
+    return loadOrCreateUser(profile)
         .then((user) => {
             if (user.matches[user.matches.length-1] !== message.match.conversation.createdAt) {
                 user.matches.push(message.match.conversation.createdAt);
             }
 
-            return saveUser(user);
+            user.commonInterests = message.match.commonInterests;
+            const newCommonInterests = user.commonInterests.filter(i => user.interests.indexOf(i) === -1);
+            user.interests.push(...newCommonInterests);
+
+            return db.users.put(user);
         });
 });
-
-let currentlyFetching = '';
-let currentUi: HTMLElement | undefined;
-const onLocationChange = (path: string) => {
-    currentUi?.remove();
-
-    const match = path.match(/^\/chat.*\/(.{24})$/i);
-    if (!match) {
-        return;
-    }
-    const conversationId = match[1];
-
-    if (currentlyFetching === conversationId) {
-        return;
-    }
-    currentlyFetching = conversationId;
-
-    getUserIdFromConversation(conversationId)
-        .then(id => Promise.all([fetchProfile(id), loadUser(id)]))
-        .then(([profile, user]) => {
-            if (user.names.indexOf(profile.username) === -1) {
-                user.names.push(profile.username);
-            }
-
-            if (lastMatchUpdate && lastMatchUpdate.match.conversation.id === conversationId) {
-                const newCommonInterests = lastMatchUpdate.match.commonInterests.filter(i => profile.interests.indexOf(i) === -1);
-                profile.interests.push(...newCommonInterests);
-            }
-
-            const newInterests = profile.interests.filter(i => user.interests.indexOf(i) === -1);
-            user.interests.push(...newInterests);
-            
-            saveUser(user);
-
-            if (currentlyFetching !== conversationId) {
-                return;
-            }
-            currentlyFetching = '';
-
-            currentUi = createUi(profile, user);
-            document.querySelector('aside > div:nth-child(2) > div')!.prepend(currentUi);
-        })
-        .catch(console.error);
-};
-
-setLocationChangeCallback(onLocationChange);
-
-setTimeout(() => {
-    document.querySelector('aside > div:nth-child(2) > div > div')?.remove();
-    onLocationChange(location.pathname);
-}, 1000);
