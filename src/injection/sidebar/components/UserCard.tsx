@@ -1,7 +1,13 @@
 import { For, Show, createMemo, createSignal } from 'solid-js';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 import { User, db } from '../../db';
 import { Profile } from '../../api';
 import styles from './UserCard.module.css';
+
+dayjs.extend(relativeTime);
+dayjs.extend(localizedFormat);
 
 interface UserCardProps {
     user: User,
@@ -21,12 +27,17 @@ const badgeName = (badges: number[]): string => {
     }).join(', ');
 }
 
-export const UserCard = (props: UserCardProps) => {
+export const UserCard = (props: {
+    user: User,
+    profile: Profile,
+}) => {
     const [showMatches, setShowMatches] = createSignal(false);
     const [showInterests, setShowInterests] = createSignal(false);
     const [showPreviousInterests, setShowPreviousInterests] = createSignal(false);
 
     const avatarUrl = () => `https://cdn.chitchat.gg/avatars/${props.user.id}/${props.profile.avatar}.webp`;
+
+    const age = () => dayjs(props.profile.createdAt);
 
     const currentInterests = createMemo(() => {
         if (props.profile.interests && props.profile.interests.length > 0) {
@@ -45,15 +56,23 @@ export const UserCard = (props: UserCardProps) => {
                         <img src={avatarUrl()} width='42' />
                     </a>
                 </Show>
-                <span
-                    class={`${styles.name} ${styles.pointer} ${props.user.avoid ? styles.red : styles.green}`}
-                    onClick={() => {
-                        props.user.avoid = !props.user.avoid;
-                        db.users.put(props.user);
-                    }}
-                >
-                    {props.user.name}
-                </span>
+                <div>
+                    <div
+                        class={`${styles.name} ${styles.pointer} ${props.user.avoid ? styles.red : styles.green}`}
+                        onClick={() => {
+                            props.user.avoid = !props.user.avoid;
+                            db.users.put(props.user);
+                        }}
+                    >
+                        {props.user.name}
+                    </div>
+                    <div
+                        class={`${styles.age} ${age().isAfter(dayjs().subtract(1, 'hour')) ? styles.red : ''}`}
+                        title={age().format('lll')}
+                    >
+                        Account age: { age().fromNow(true) }
+                    </div>
+                </div>
             </div>
 
             <Show when={props.user.previousNames.length > 0}>

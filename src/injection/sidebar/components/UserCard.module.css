@@ -1,8 +1,9 @@
 .usercard {
     padding: 8px 4px 0 4px;
-    overflow: hidden;
+    overflow-x: hidden;
     font: 95%;
     user-select: none;
+    max-height: 50vh;
 }
 
 .usercard > *:not(:last-child) {
@@ -22,9 +23,16 @@
     margin-bottom: 5px;
 }
 
-.name {
+.header:last-child {
     flex: 1;
+}
+
+.name {
     font-size: 110%;
+}
+
+.age {
+    font-size: 85%;
 }
 
 .info {

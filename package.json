@@ -16,6 +16,7 @@
     "typescript": "^5.4.3"
   },
   "dependencies": {
+    "dayjs": "^1.11.11",
     "dexie": "^4.0.7",
     "solid-js": "^1.8.17"
   }
